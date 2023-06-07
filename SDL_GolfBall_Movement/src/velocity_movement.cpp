@@ -109,6 +109,20 @@ int main(int argc, char* argv[]){
         return 0;
     }
 
+    SDL_Texture* arrowTexture = loadMedia("../../res/arrow.png");
+
+    if(arrowTexture == NULL){
+        puts("Error loading arrow media\n");
+        return 0;
+    }
+
+    SDL_Texture* arrowTipTexture = loadMedia("../../res/arrow_tip.png");
+
+    if(arrowTipTexture == NULL){
+        puts("Error loading arrow tip media\n");
+        return 0;
+    }
+
     Mix_Chunk* swingSound = Mix_LoadWAV("../../res/swing.wav");
     Mix_Chunk* collisionSound = Mix_LoadWAV("../../res/collision.wav");
     Mix_Chunk* holeSound = Mix_LoadWAV("../../res/hole.wav");
@@ -297,7 +311,7 @@ int main(int argc, char* argv[]){
 
             float segmentLength = sqrt(pow(endX - startX, 2) + pow(endY - startY, 2));
 
-            if(segmentLength <= 33.3f){
+            /*if(segmentLength <= 33.3f){
                 SDL_SetRenderDrawColor(gRenderer, 0x00, 0xFF, 0x00, 0xFF);
             }
             else if(segmentLength > 33.3f && segmentLength <= 66.7f){
@@ -306,13 +320,38 @@ int main(int argc, char* argv[]){
             else if(segmentLength > 66.7f && segmentLength < 100.0f){
                 SDL_SetRenderDrawColor(gRenderer, 0xFF, 0x80, 0x00, 0xFF);
             }
-            else {
+            else {*/
+
+float angle = atan2(endY - startY, endX - startX);
+            
+            if(segmentLength > 100.0f){
                 SDL_SetRenderDrawColor(gRenderer, 0xFF, 0x00, 0x00, 0xFF);
                 segmentLength = 100.0f;
-                float angle = atan2(endY - startY, endX - startX);
+                
                 endX = cos(angle) * segmentLength + startX;
                 endY = sin(angle) * segmentLength + startY;
             }
+
+            int w, h;
+
+            SDL_QueryTexture(arrowTexture, NULL, NULL, &w, &h);
+
+            float computedW =segmentLength;
+
+            SDL_FRect arrow = {startX, startY - h / 20.0f / 2, computedW, h / 20.0f};
+
+            SDL_FPoint center = {0, (arrow.h / 2)};
+
+            SDL_RenderCopyExF(gRenderer, arrowTexture, NULL, &arrow, angle * 180 / M_PI, &center, SDL_FLIP_NONE);
+
+            SDL_QueryTexture(arrowTipTexture, NULL, NULL, &w, &h);
+
+            computedW = w / 20.0f;
+            float computedH = h / 20.0f;
+
+            SDL_FRect tip = {endX - (float)(sqrt(pow(computedW / 2, 2) + pow(computedH / 2, 2))) / 2, endY - (float)(sqrt(pow(computedW / 2, 2) + pow(computedH / 2, 2))) / 2, w / 20.0f, h / 20.0f};
+
+            SDL_RenderCopyExF(gRenderer, arrowTipTexture, NULL, &tip, angle * 180 / M_PI, &center, SDL_FLIP_NONE);
 
             SDL_RenderDrawLine(gRenderer, startX, startY, endX, endY);
         }

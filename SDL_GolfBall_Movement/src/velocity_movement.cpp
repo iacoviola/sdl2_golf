@@ -116,10 +116,10 @@ int main(int argc, char* argv[]){
         return 0;
     }
 
-    SDL_Texture* arrowTipTexture = loadMedia("../../res/arrow_tip.png");
+    SDL_Texture* powerBarTexture = loadMedia("../../res/power_bar.png");
 
-    if(arrowTipTexture == NULL){
-        puts("Error loading arrow tip media\n");
+    if(powerBarTexture == NULL){
+        puts("Error loading arrow power bar media\n");
         return 0;
     }
 
@@ -222,7 +222,7 @@ int main(int argc, char* argv[]){
             continue;
         }*/
 
-        printf("framerate: %f\n", 1000.0f / delta);
+        //printf("framerate: %f\n", 1000.0f / delta);
 
         while(accumulator >= FIXED_TIMESTEP){
 
@@ -322,7 +322,7 @@ int main(int argc, char* argv[]){
             }
             else {*/
 
-float angle = atan2(endY - startY, endX - startX);
+            float angle = atan2(endY - startY, endX - startX);
             
             if(segmentLength > 100.0f){
                 SDL_SetRenderDrawColor(gRenderer, 0xFF, 0x00, 0x00, 0xFF);
@@ -335,25 +335,19 @@ float angle = atan2(endY - startY, endX - startX);
             int w, h;
 
             SDL_QueryTexture(arrowTexture, NULL, NULL, &w, &h);
-
-            float computedW =segmentLength;
-
-            SDL_FRect arrow = {startX, startY - h / 20.0f / 2, computedW, h / 20.0f};
-
+            SDL_FRect arrow = {startX, startY - h / 20.0f / 2, w / 20.0f, h / 20.0f};
             SDL_FPoint center = {0, (arrow.h / 2)};
 
             SDL_RenderCopyExF(gRenderer, arrowTexture, NULL, &arrow, angle * 180 / M_PI, &center, SDL_FLIP_NONE);
 
-            SDL_QueryTexture(arrowTipTexture, NULL, NULL, &w, &h);
+            SDL_QueryTexture(powerBarTexture, NULL, NULL, &w, &h);
+            SDL_FRect powerBar = {startX + 10, startY - h / 20.0f, w / 10.0f, h / 10.0f};
+            SDL_Rect powerBarFill = {0, (int)(h - (h * (segmentLength / 100))), w, (int)(h * (segmentLength / 100))};
 
-            computedW = w / 20.0f;
-            float computedH = h / 20.0f;
+            powerBar.h = h / 10.0f * (segmentLength / 100);
+            powerBar.y +=  h / 10.0f - powerBar.h;
 
-            SDL_FRect tip = {endX - (float)(sqrt(pow(computedW / 2, 2) + pow(computedH / 2, 2))) / 2, endY - (float)(sqrt(pow(computedW / 2, 2) + pow(computedH / 2, 2))) / 2, w / 20.0f, h / 20.0f};
-
-            SDL_RenderCopyExF(gRenderer, arrowTipTexture, NULL, &tip, angle * 180 / M_PI, &center, SDL_FLIP_NONE);
-
-            SDL_RenderDrawLine(gRenderer, startX, startY, endX, endY);
+            SDL_RenderCopyF(gRenderer, powerBarTexture, &powerBarFill, &powerBar);
         }
 
         SDL_RenderCopyF(gRenderer, ballTexture, NULL, &rect);

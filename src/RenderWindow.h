@@ -52,6 +52,8 @@ inline bool init(int flags = SDL_INIT_EVERYTHING, int modules = SDL_ALL, int img
         return false;
     }
 
+    SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1");
+
     if(modules & SDL_IMAGE){
         if(IMG_Init(imgFlags) != imgFlags){
             return false;

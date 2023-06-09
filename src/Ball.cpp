@@ -35,9 +35,9 @@ void Ball::update(float dt){
     }
 }
 
-void Ball::shrink(float shrink_factor, float dt){
-    setScale(getScale() * shrink_factor * dt);
-    setPosition(getPosition() + (getScale() * shrink_factor * dt) / 2.0f);
+void Ball::shrink(float shrink_factor){
+    setScale(getScale().x - shrink_factor, getScale().y - shrink_factor);
+    setPosition(getPosition().x + shrink_factor / 2.0f, getPosition().y + shrink_factor / 2.0f);
 }
 
 void Ball::setVelocity(math::Vector2f velocity){
@@ -55,6 +55,10 @@ void Ball::setMoving(bool moving){
 
 bool Ball::isMoving() const {
     return moving;
+}
+
+SDL_FRect Ball::getRect() {
+    return {getPosition().x, getPosition().y, getScale().x, getScale().y};
 }
 
 math::Vector2f Ball::getVelocity() const {

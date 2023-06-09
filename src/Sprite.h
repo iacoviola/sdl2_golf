@@ -30,9 +30,9 @@ class Sprite
 
         void setAngle(float angle);
 
-        void setCenter(SDL_Point* center);
+        void setRotationCenter(SDL_FPoint* center);
 
-        void setCenter(int x, int y);
+        void setRotationCenter(int x, int y);
 
         void setClip(SDL_Rect* clip);
 
@@ -42,15 +42,19 @@ class Sprite
 
         math::Vector2f getScale();
 
+        math::Vector2f getRawScale();
+
         math::Vector2f getPosition();
 
         SDL_RendererFlip getFlip();
 
         float getAngle();
 
-        SDL_Point* getCenter();
+        SDL_FPoint* getRotationCenter();
 
         SDL_Rect* getClip();
+
+        math::Vector2f getCenter();
 
         private:
             sdl::Texture* texture;
@@ -58,7 +62,7 @@ class Sprite
             math::Vector2f position;
             SDL_RendererFlip flip;
             float angle;
-            SDL_Point* center;
+            SDL_FPoint* center;
             SDL_Rect* clip;
 };
 }

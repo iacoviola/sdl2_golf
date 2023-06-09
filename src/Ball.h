@@ -16,7 +16,7 @@ class Ball : public sdl::Sprite
 
         void update(float dt);
 
-        void shrink(float shrink_factor, float dt);
+        void shrink(float shrink_factor);
 
         void setVelocity(math::Vector2f velocity);
 
@@ -25,6 +25,8 @@ class Ball : public sdl::Sprite
         void setMoving(bool moving);
 
         bool isMoving() const;
+
+        SDL_FRect getRect();
 
         math::Vector2f getVelocity() const;
 

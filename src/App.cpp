@@ -35,8 +35,6 @@ void App::run(){
         double acc = dt.count() / 1000000.0f;
         accumulator += acc;
 
-        printf("dt: %f\n", acc);
-
         handleEvents();
         update();
         render();
@@ -61,7 +59,7 @@ void App::initAdditional(){
 
 void App::handleEvents(){
     SDL_Event event;
-    SDL_FRect golf_ball_rect = {ball.getPosition().x, ball.getPosition().y, ball.getScale().x, ball.getScale().y};
+    SDL_FRect ball_rect = ball.getRect();
 
     if(SDL_PollEvent(&event)){
         if(event.type == SDL_QUIT){
@@ -72,7 +70,7 @@ void App::handleEvents(){
                 int x, y;
                 SDL_GetMouseState(&x, &y);
 
-                if(x > golf_ball_rect.x && x < golf_ball_rect.x + golf_ball_rect.w && y > golf_ball_rect.y && y < golf_ball_rect.y + golf_ball_rect.h){
+                if(x > ball_rect.x && x < ball_rect.x + ball_rect.w && y > ball_rect.y && y < ball_rect.y + ball_rect.h){
                     lock = true;
                 }
             }
@@ -82,7 +80,7 @@ void App::handleEvents(){
                 int x, y;
                 SDL_GetMouseState(&x, &y);
 
-                math::Vector2f golf_ball_velocity = math::Vector2f(-(x - (golf_ball_rect.x + golf_ball_rect.w / 2)), -(y - (golf_ball_rect.y + golf_ball_rect.h / 2)));
+                math::Vector2f golf_ball_velocity = math::Vector2f(-(x - (ball_rect.x + ball_rect.w / 2)), -(y - (ball_rect.y + ball_rect.h / 2)));
                 float velocity1D = golf_ball_velocity.magnitude();
 
                 if(velocity1D > 15.0f){
@@ -159,10 +157,12 @@ void App::update(){
 
 
         if(!win){
-            if(ball.getPosition().x > hole.getPosition().x - 5 && 
+            float distance = sqrt(pow(ball.getCenter().x - hole.getCenter().x, 2) + pow(ball.getCenter().y - hole.getCenter().y, 2));
+            if(distance < 7.5f
+                /*ball.getPosition().x > hole.getPosition().x - 5 && 
                 ball.getPosition().x + ball.getScale().x < hole.getPosition().x + hole.getScale().x + 5 && 
                 ball.getPosition().y > hole.getPosition().y - 5 && 
-                ball.getPosition().y + ball.getScale().y < hole.getPosition().y + hole.getScale().y + 5)
+                ball.getPosition().y + ball.getScale().y < hole.getPosition().y + hole.getScale().y + 5*/)
             {
                 ball.setVelocity(0.0f, 0.0f);
                 ball.setMoving(false);
@@ -171,9 +171,8 @@ void App::update(){
             }
         }
         else {
-            ball.shrink(0.5f, FIXED_DELTA_TIME);
+            ball.shrink(0.5f);
         }
-
 
         accumulator -= FIXED_DELTA_TIME;
     }
@@ -184,9 +183,47 @@ void App::render(){
 
     window.render(field);
     window.render(hole);
-    window.render(ball);
 
-    //Need to render also: arrow, powerbar, powerbar background
+    if(lock){
+        int x, y;
+        SDL_GetMouseState(&x, &y);
+
+        SDL_FRect ball_rect = ball.getRect();
+
+        float startX = ball_rect.x + ball_rect.w / 2;
+        float startY = ball_rect.y + ball_rect.h / 2;
+        float endX = -(x - (ball_rect.x + ball_rect.w / 2)) + ball_rect.x + ball_rect.w / 2;
+        float endY = -(y - (ball_rect.y + ball_rect.h / 2)) + ball_rect.y + ball_rect.h / 2;
+
+        float segmentLength = sqrt(pow(endX - startX, 2) + pow(endY - startY, 2));
+
+        if(segmentLength > 15.0f){
+
+            if(segmentLength > 100.0f){
+                segmentLength = 100.0f;
+            }
+
+            float angle = atan2(endY - startY, endX - startX);
+
+            arrow.setAngle(angle * 180 / M_PI);
+            arrow.setPosition(startX, startY - arrow.getScale().y / 2);
+            arrow.setRotationCenter(0, arrow.getScale().y / 2);
+
+            window.render(arrow);
+
+            powerbar_bg.setPosition(startX + 15 - ((powerbar_bg.getScale().x - powerbar.getRawScale().x) / 2), startY - powerbar_bg.getScale().y / 2);
+
+            window.render(powerbar_bg);
+
+            powerbar.setClip(0, powerbar.getRawScale().y - (powerbar.getRawScale().y * (segmentLength / 100)), powerbar.getRawScale().x, powerbar.getRawScale().y * (segmentLength / 100));
+            powerbar.setScale(powerbar.getRawScale().x, powerbar.getRawScale().y * (segmentLength / 100));
+            powerbar.setPosition(startX + 15, startY - powerbar.getRawScale().y / 2 + (powerbar.getRawScale().y - powerbar.getScale().y));
+            
+            window.render(powerbar);
+        }
+    }
+
+    window.render(ball);
 
     window.display();
 

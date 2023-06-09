@@ -45,20 +45,28 @@ void sdl::Sprite::setAngle(float angle){
     this->angle = angle;
 }
 
-void sdl::Sprite::setCenter(SDL_Point* center){
+void sdl::Sprite::setRotationCenter(SDL_FPoint* center){
+    if(this->center == nullptr)
+        this->center = new SDL_FPoint();
     this->center = center;
 }
 
-void sdl::Sprite::setCenter(int x, int y){
+void sdl::Sprite::setRotationCenter(int x, int y){
+    if(this->center == nullptr)
+        this->center = new SDL_FPoint();
     this->center->x = x;
     this->center->y = y;
 }
 
 void sdl::Sprite::setClip(SDL_Rect* clip){
+    if(this->clip == nullptr)
+        this->clip = new SDL_Rect();
     this->clip = clip;
 }
 
 void sdl::Sprite::setClip(int x, int y, int w, int h){
+    if(this->clip == nullptr)
+        this->clip = new SDL_Rect();
     this->clip->x = x;
     this->clip->y = y;
     this->clip->w = w;
@@ -73,6 +81,10 @@ math::Vector2f sdl::Sprite::getScale(){
     return scale;
 }
 
+math::Vector2f sdl::Sprite::getRawScale(){
+    return math::Vector2f(texture->getWidth(), texture->getHeight());
+}
+
 math::Vector2f sdl::Sprite::getPosition(){
     return position;
 }
@@ -85,10 +97,14 @@ float sdl::Sprite::getAngle(){
     return angle;
 }
 
-SDL_Point* sdl::Sprite::getCenter(){
+SDL_FPoint* sdl::Sprite::getRotationCenter(){
     return center;
 }
 
 SDL_Rect* sdl::Sprite::getClip(){
     return clip;
+}
+
+math::Vector2f sdl::Sprite::getCenter() {
+    return math::Vector2f(position.x + (scale.x / 2), position.y + (scale.y / 2));
 }

@@ -22,12 +22,13 @@ void sdl::RenderWindow::clear(){
 }
 
 void sdl::RenderWindow::render(sdl::Sprite& sprite){
-    SDL_Rect rect;
+    SDL_FRect rect;
     rect.x = sprite.getPosition().x;
     rect.y = sprite.getPosition().y;
     rect.w = sprite.getScale().x;
     rect.h = sprite.getScale().y;
-    SDL_RenderCopyEx(renderer, sprite.getTexture()->getTexture(), sprite.getClip(), &rect, sprite.getAngle(), sprite.getCenter(), sprite.getFlip());
+    
+    SDL_RenderCopyExF(renderer, sprite.getTexture()->getTexture(), sprite.getClip(), &rect, sprite.getAngle(), sprite.getRotationCenter(), sprite.getFlip());
 }
 
 sdl::Texture* sdl::RenderWindow::loadTextureFromFile(const std::string path){

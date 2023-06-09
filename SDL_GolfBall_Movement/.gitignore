@@ -1,0 +1,6 @@
+build/
+res/psd/
+.vscode/
+src/Vector2\ tests/
+velocity_movement.cpp.old
+.DS_Store

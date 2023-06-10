@@ -24,7 +24,16 @@ class App
 
         void handleEvents();
 
-        void update();
+        void handleMouseButtonDown(const SDL_FRect& ball_rect);
+
+        void handleMouseButtonUp(const SDL_FRect& ball_rect);
+
+        void handleKeyDown(const SDL_Event& event);
+
+        void resetGame();
+
+        void updatePhysics();
+        void updateStatic();
 
         void render();
 
@@ -47,7 +56,7 @@ class App
         std::chrono::microseconds dt;
 
         double accumulator = 0.0;
-        bool lock = false, win = false, running = true;
+        bool lock = false, win = false, running = true, draw_aux = false;
 
         const double FIXED_DELTA_TIME = 0.016;
 };

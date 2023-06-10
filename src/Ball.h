@@ -28,7 +28,7 @@ class Ball : public sdl::Sprite
 
         SDL_FRect getRect();
 
-        math::Vector2f getVelocity() const;
+        math::Vector2f& getVelocity();
 
     private:
         math::Vector2f velocity;

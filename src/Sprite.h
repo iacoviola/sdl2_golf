@@ -40,13 +40,13 @@ class Sprite
 
         Texture* getTexture();
 
-        math::Vector2f getScale();
+        math::Vector2f& getScale();
 
         math::Vector2f getRawScale();
 
-        math::Vector2f getPosition();
+        math::Vector2f& getPosition();
 
-        SDL_RendererFlip getFlip();
+        SDL_RendererFlip& getFlip();
 
         float getAngle();
 

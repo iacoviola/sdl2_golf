@@ -77,7 +77,7 @@ sdl::Texture* sdl::Sprite::getTexture(){
     return texture;
 }
 
-math::Vector2f sdl::Sprite::getScale(){
+math::Vector2f& sdl::Sprite::getScale(){
     return scale;
 }
 
@@ -85,11 +85,11 @@ math::Vector2f sdl::Sprite::getRawScale(){
     return math::Vector2f(texture->getWidth(), texture->getHeight());
 }
 
-math::Vector2f sdl::Sprite::getPosition(){
+math::Vector2f& sdl::Sprite::getPosition(){
     return position;
 }
 
-SDL_RendererFlip sdl::Sprite::getFlip(){
+SDL_RendererFlip& sdl::Sprite::getFlip(){
     return flip;
 }
 

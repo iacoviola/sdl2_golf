@@ -53,6 +53,6 @@ float sdl::Texture::getHeight() const {
     return size.y;
 }
 
-math::Vector2f sdl::Texture::getSize() const {
+math::Vector2f& sdl::Texture::getSize(){
     return size;
 }

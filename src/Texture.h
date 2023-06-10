@@ -25,7 +25,7 @@ class Texture {
 
         float getHeight() const;
 
-        math::Vector2f getSize() const;
+        math::Vector2f& getSize();
 
     private:
         SDL_Texture* texture;

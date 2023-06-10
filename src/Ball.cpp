@@ -61,6 +61,6 @@ SDL_FRect Ball::getRect() {
     return {getPosition().x, getPosition().y, getScale().x, getScale().y};
 }
 
-math::Vector2f Ball::getVelocity() const {
+math::Vector2f& Ball::getVelocity(){
     return velocity;
 }

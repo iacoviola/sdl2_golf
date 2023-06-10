@@ -47,7 +47,7 @@ class RenderWindow
         SDL_Renderer* renderer;
 };
 
-inline bool init(int flags = SDL_INIT_EVERYTHING, int modules = SDL_ALL, int imgFlags = IMG_INIT_PNG){
+inline bool initSDL(int flags = SDL_INIT_EVERYTHING, int modules = SDL_ALL, int imgFlags = IMG_INIT_PNG){
     if(SDL_Init(flags) < 0){
         return false;
     }

@@ -20,7 +20,7 @@ class App
 
     private:
 
-        void initAdditional();
+        void init();
 
         void handleEvents();
 
@@ -37,7 +37,7 @@ class App
 
         void render();
 
-        sdl::RenderWindow window;
+        sdl::RenderWindow* window;
 
         Ball ball;
         sdl::Sprite hole;

@@ -14,6 +14,9 @@ sdl::RenderWindow::RenderWindow(const std::string title, const int width, const 
 sdl::RenderWindow::~RenderWindow(){
     SDL_DestroyRenderer(renderer);
     SDL_DestroyWindow(window);
+
+    renderer = nullptr;
+    window = nullptr;
 }
 
 void sdl::RenderWindow::clear(){

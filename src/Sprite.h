@@ -18,6 +18,8 @@ class Sprite
 
         ~Sprite();
 
+        void setTexture(sdl::Texture* texture);
+
         void setScale(math::Vector2f scale);
 
         void setScale(float x, float y);

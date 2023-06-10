@@ -9,19 +9,21 @@
 #include "Sprite.h" 
 #include "Ball.h"
 
-App::App()
-: window("SDL2 Golf", 640, 480), 
-  ball(window.loadTextureFromFile("../../res/imgs/golf_ball.png")),
-  hole(window.loadTextureFromFile("../../res/imgs/hole.png")),
-  field(window.loadTextureFromFile("../../res/imgs/field.jpg")),
-  arrow(window.loadTextureFromFile("../../res/imgs/arrow.png")),
-  powerbar(window.loadTextureFromFile("../../res/imgs/powerbar.png")),
-  powerbar_bg(window.loadTextureFromFile("../../res/imgs/powerbar_bg.png"))
-{
-    initAdditional();
+App::App(){
+    init();
 }
 
 App::~App(){
+    Mix_FreeChunk(swingSound);
+    Mix_FreeChunk(collisionSound);
+    Mix_FreeChunk(holeSound);
+
+    swingSound = nullptr;
+    collisionSound = nullptr;
+    holeSound = nullptr;
+
+    delete window;
+
     sdl::quit();
 }
         
@@ -44,19 +46,34 @@ void App::run(){
     }
 }
 
-void App::initAdditional(){
+void App::init(){
+
+    int flags = SDL_INIT_VIDEO;
+    int modules = sdl::SDL_IMAGE | sdl::SDL_MIXER;
+    int imgFlags = IMG_INIT_PNG | IMG_INIT_JPG;
+    sdl::initSDL(flags, modules, imgFlags);
+
+    window = new sdl::RenderWindow("SDL2 Golf", 640, 480);
+
+    ball.setTexture(window->loadTextureFromFile("../../res/imgs/golf_ball.png"));
+    hole.setTexture(window->loadTextureFromFile("../../res/imgs/hole.png"));
+    field.setTexture(window->loadTextureFromFile("../../res/imgs/field.jpg"));
+    arrow.setTexture(window->loadTextureFromFile("../../res/imgs/arrow.png"));
+    powerbar.setTexture(window->loadTextureFromFile("../../res/imgs/powerbar.png"));
+    powerbar_bg.setTexture(window->loadTextureFromFile("../../res/imgs/powerbar_bg.png"));
+
     swingSound = Mix_LoadWAV("../../res/sounds/swing.wav");
     collisionSound = Mix_LoadWAV("../../res/sounds/collision.wav");
     holeSound = Mix_LoadWAV("../../res/sounds/hole.wav");
 
     int x, y;
     ball.setScale(ball.getTexture()->getWidth(), ball.getTexture()->getHeight());
-    x = (rand() % (window.getWidth() - (int)ball.getScale().x * 2)) + ball.getScale().x;
-    y = (rand() % (window.getHeight() - (int)ball.getScale().y * 2)) + ball.getScale().y;
+    x = (rand() % (window->getWidth() - (int)ball.getScale().x * 2)) + ball.getScale().x;
+    y = (rand() % (window->getHeight() - (int)ball.getScale().y * 2)) + ball.getScale().y;
     ball.setPosition(x ,y);
 
-    x = (rand() % (window.getWidth() - (int)hole.getScale().x * 2)) + hole.getScale().x;
-    y = (rand() % (window.getHeight() - (int)hole.getScale().y * 2)) + hole.getScale().y;
+    x = (rand() % (window->getWidth() - (int)hole.getScale().x * 2)) + hole.getScale().x;
+    y = (rand() % (window->getHeight() - (int)hole.getScale().y * 2)) + hole.getScale().y;
     hole.setPosition(x, y);
 }
 
@@ -138,12 +155,12 @@ void App::handleKeyDown(const SDL_Event& event) {
 void App::resetGame() {
     int x, y;
     ball.setScale(ball.getTexture()->getWidth(), ball.getTexture()->getHeight());
-    x = (rand() % (window.getWidth() - (int)ball.getScale().x * 2)) + ball.getScale().x;
-    y = (rand() % (window.getHeight() - (int)ball.getScale().y * 2)) + ball.getScale().y;
+    x = (rand() % (window->getWidth() - (int)ball.getScale().x * 2)) + ball.getScale().x;
+    y = (rand() % (window->getHeight() - (int)ball.getScale().y * 2)) + ball.getScale().y;
     ball.setPosition(x, y);
 
-    x = (rand() % (window.getWidth() - (int)hole.getScale().x * 2)) + hole.getScale().x;
-    y = (rand() % (window.getHeight() - (int)hole.getScale().y * 2)) + hole.getScale().y;
+    x = (rand() % (window->getWidth() - (int)hole.getScale().x * 2)) + hole.getScale().x;
+    y = (rand() % (window->getHeight() - (int)hole.getScale().y * 2)) + hole.getScale().y;
     hole.setPosition(x, y);
 
     win = false;
@@ -159,8 +176,8 @@ void App::updatePhysics(){
             Mix_PlayChannel(-1, collisionSound, 0);
             Mix_Volume(-1, ball.getVelocity().magnitude() * 1.28f );
         }
-        else if(ball.getPosition().x + ball.getScale().x > window.getWidth()){
-            ball.setPosition(window.getWidth() - ball.getScale().x, ball.getPosition().y);
+        else if(ball.getPosition().x + ball.getScale().x > window->getWidth()){
+            ball.setPosition(window->getWidth() - ball.getScale().x, ball.getPosition().y);
             ball.setVelocity(-ball.getVelocity().x, ball.getVelocity().y);
             Mix_PlayChannel(-1, collisionSound, 0);
             Mix_Volume(-1, ball.getVelocity().magnitude() * 1.28f );
@@ -172,8 +189,8 @@ void App::updatePhysics(){
             Mix_PlayChannel(-1, collisionSound, 0);
             Mix_Volume(-1, ball.getVelocity().magnitude() * 1.28f );
         }
-        else if(ball.getPosition().y + ball.getScale().y > window.getHeight()){
-            ball.setPosition(ball.getPosition().x, window.getHeight() - ball.getScale().y);
+        else if(ball.getPosition().y + ball.getScale().y > window->getHeight()){
+            ball.setPosition(ball.getPosition().x, window->getHeight() - ball.getScale().y);
             ball.setVelocity(ball.getVelocity().x, -ball.getVelocity().y);
             Mix_PlayChannel(-1, collisionSound, 0);
             Mix_Volume(-1, ball.getVelocity().magnitude() * 1.28f );
@@ -244,19 +261,19 @@ void App::updateStatic(){
 }
 
 void App::render(){
-    window.clear();
+    window->clear();
 
-    window.render(field);
-    window.render(hole);
+    window->render(field);
+    window->render(hole);
 
     if(lock && draw_aux){
-        window.render(arrow);
-        window.render(powerbar_bg);
-        window.render(powerbar);
+        window->render(arrow);
+        window->render(powerbar_bg);
+        window->render(powerbar);
     }
 
-    window.render(ball);
+    window->render(ball);
 
-    window.display();
+    window->display();
 
 }

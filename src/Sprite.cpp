@@ -5,7 +5,8 @@
 #include "Vector2f.h"
 #include "Texture.h"
 
-sdl::Sprite::Sprite() {}
+sdl::Sprite::Sprite()
+: texture(nullptr), scale(0, 0), position(0, 0), flip(SDL_FLIP_NONE), angle(0), center(nullptr), clip(nullptr) {}
 
 sdl::Sprite::Sprite(sdl::Texture *texture)
 : texture(texture), scale(texture->getWidth(), texture->getHeight()), position(0, 0), flip(SDL_FLIP_NONE), angle(0), center(nullptr), clip(nullptr) {}
@@ -17,6 +18,11 @@ sdl::Sprite::~Sprite(){
     texture = nullptr;
     center = nullptr;
     clip = nullptr;
+}
+
+void sdl::Sprite::setTexture(sdl::Texture* texture){
+    this->texture = texture;
+    setScale(texture->getWidth(), texture->getHeight());
 }
 
 void sdl::Sprite::setScale(math::Vector2f scale){

@@ -12,9 +12,17 @@
 #include "Tile.h"
 #include "Ball.h"
 
-App::App() { //: gen(std::random_device()()){
+#ifdef _WIN32
+#define gen rand
+App::App(){
+    srand(time(NULL));
     init();
 }
+#else
+App::App() : gen(std::random_device()()){
+    init();
+}
+#endif
 
 App::~App(){
     Mix_FreeChunk(swingSound);
@@ -58,8 +66,6 @@ void App::init(){
     int modules = sdl::SDL_IMAGE | sdl::SDL_MIXER;
     int imgFlags = IMG_INIT_PNG | IMG_INIT_JPG;
     sdl::initSDL(flags, modules, imgFlags);
-
-    srand(time(NULL));
 
     window = new sdl::RenderWindow("SDL2 Golf", 480, 640);
 
@@ -168,18 +174,18 @@ void App::resetGame() {
 void App::randomize(){
     
     int x, y;
-    x = (rand() % (window->getWidth() - (int)ball.getScale().x * 2)) + ball.getScale().x;
+    x = (gen() % (window->getWidth() - (int)ball.getScale().x * 2)) + ball.getScale().x;
     y = window->getHeight() - ball.getScale().y - 30;
     ball.setPosition(x ,y);
 
-    x = (rand() % (window->getWidth() - (int)hole.getScale().x * 2)) + hole.getScale().x;
-    y = (rand() % (window->getHeight() / 4 - (int)hole.getScale().y * 2)) + hole.getScale().y;
+    x = (gen() % (window->getWidth() - (int)hole.getScale().x * 2)) + hole.getScale().x;
+    y = (gen() % (window->getHeight() / 4 - (int)hole.getScale().y * 2)) + hole.getScale().y;
     hole.setPosition(x, y);
 
     for(Tile &tile : tiles){
         do{
-            x = (rand() % (window->getWidth() - (int)tile.getScale().x * 2)) + tile.getScale().x;
-            y = (rand() % (window->getHeight() - (int)tile.getScale().y * 2 - (int)ball.getScale().y - 50)) + tile.getScale().y;
+            x = (gen() % (window->getWidth() - (int)tile.getScale().x * 2)) + tile.getScale().x;
+            y = (gen() % (window->getHeight() - (int)tile.getScale().y * 2 - (int)ball.getScale().y - 50)) + tile.getScale().y;
             tile.setPosition(x, y);
         } while(tile.collidesWith(hole) != sdl::sdlDirection::SDL_NONE);
     }

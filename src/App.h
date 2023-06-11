@@ -67,7 +67,9 @@ class App
 
         const double FIXED_DELTA_TIME = 0.016;
 
-        //std::mt19937 gen;
+        #ifndef _WIN32
+        std::mt19937 gen;
+        #endif
 };
 
 #endif // APP_H

@@ -1,5 +1,7 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_mixer.h>
+#include <chrono>
+#include <vector>
 
 #include "App.h"
 
@@ -7,6 +9,7 @@
 #include "Vector2f.h"
 #include "Texture.h"
 #include "Sprite.h" 
+#include "Tile.h"
 #include "Ball.h"
 
 App::App(){
@@ -41,6 +44,10 @@ void App::run(){
 
         updateStatic();
         updatePhysics();
+
+        if(ball.isMoving()){
+            checkCollisions();
+        }
         
         render();
     }
@@ -61,6 +68,14 @@ void App::init(){
     arrow.setTexture(window->loadTextureFromFile("../../res/imgs/arrow.png"));
     powerbar.setTexture(window->loadTextureFromFile("../../res/imgs/powerbar.png"));
     powerbar_bg.setTexture(window->loadTextureFromFile("../../res/imgs/powerbar_bg.png"));
+
+    sdl::Texture* tileTexture = window->loadTextureFromFile("../../res/imgs/tile.png");
+    for(int i = 0; i < 3; i++){
+        Tile tile(tileTexture);
+        tile.setPosition(100 + i * 100, 100);
+        tile.setScale(tileTexture->getWidth(), tileTexture->getHeight());
+        tiles.push_back(Tile(tileTexture));
+    }
 
     swingSound = Mix_LoadWAV("../../res/sounds/swing.wav");
     collisionSound = Mix_LoadWAV("../../res/sounds/collision.wav");
@@ -119,14 +134,14 @@ void App::handleMouseButtonUp(const SDL_FRect& ball_rect) {
 
     math::Vector2f golf_ball_velocity = math::Vector2f(-(x - (ball_rect.x + ball_rect.w / 2)),
                                                         -(y - (ball_rect.y + ball_rect.h / 2)));
-    float velocity1D = golf_ball_velocity.magnitude();
+    ball.setVelocity1D(golf_ball_velocity.magnitude());
 
-    if (velocity1D > 15.0f) {
-        if (velocity1D > 100.0f) {
-            velocity1D = 100.0f;
+    if (ball.getVelocity1D() > 15.0f) {
+        if (ball.getVelocity1D() > 100.0f) {
+            ball.setVelocity1D(100.0f);
             float angle = atan2(golf_ball_velocity.y, golf_ball_velocity.x);
-            golf_ball_velocity.x = cos(angle) * velocity1D;
-            golf_ball_velocity.y = sin(angle) * velocity1D;
+            golf_ball_velocity.x = cos(angle) * ball.getVelocity1D();
+            golf_ball_velocity.y = sin(angle) * ball.getVelocity1D();
         }
 
         golf_ball_velocity *= 10.0f;
@@ -138,7 +153,7 @@ void App::handleMouseButtonUp(const SDL_FRect& ball_rect) {
         draw_aux = false;
 
         Mix_PlayChannel(-1, swingSound, 0);
-        Mix_Volume(-1, velocity1D * 1.28f);
+        Mix_Volume(-1, ball.getVelocity1D() * 1.28f);
     }
 }
 
@@ -174,32 +189,32 @@ void App::updatePhysics(){
             ball.setPosition(0.0f, ball.getPosition().y);
             ball.setVelocity(-ball.getVelocity().x, ball.getVelocity().y);
             Mix_PlayChannel(-1, collisionSound, 0);
-            Mix_Volume(-1, ball.getVelocity().magnitude() * 1.28f );
+            Mix_Volume(-1, ball.getVelocity1D() * 1.28f );
         }
         else if(ball.getPosition().x + ball.getScale().x > window->getWidth()){
             ball.setPosition(window->getWidth() - ball.getScale().x, ball.getPosition().y);
             ball.setVelocity(-ball.getVelocity().x, ball.getVelocity().y);
             Mix_PlayChannel(-1, collisionSound, 0);
-            Mix_Volume(-1, ball.getVelocity().magnitude() * 1.28f );
+            Mix_Volume(-1, ball.getVelocity1D() * 1.28f );
         }
 
         if(ball.getPosition().y < 0){
             ball.setPosition(ball.getPosition().x, 0.0f);
             ball.setVelocity(ball.getVelocity().x, -ball.getVelocity().y);
             Mix_PlayChannel(-1, collisionSound, 0);
-            Mix_Volume(-1, ball.getVelocity().magnitude() * 1.28f );
+            Mix_Volume(-1, ball.getVelocity1D() * 1.28f );
         }
         else if(ball.getPosition().y + ball.getScale().y > window->getHeight()){
             ball.setPosition(ball.getPosition().x, window->getHeight() - ball.getScale().y);
             ball.setVelocity(ball.getVelocity().x, -ball.getVelocity().y);
             Mix_PlayChannel(-1, collisionSound, 0);
-            Mix_Volume(-1, ball.getVelocity().magnitude() * 1.28f );
+            Mix_Volume(-1, ball.getVelocity1D() * 1.28f );
         }
 
 
         if(!win){
             float distance = sqrt(pow(ball.getCenter().x - hole.getCenter().x, 2) + pow(ball.getCenter().y - hole.getCenter().y, 2));
-            if(distance < 7.5f
+            if(distance < 7.5f && ball.getVelocity1D() < 50.0f
                 /*ball.getPosition().x > hole.getPosition().x - 5 && 
                 ball.getPosition().x + ball.getScale().x < hole.getPosition().x + hole.getScale().x + 5 && 
                 ball.getPosition().y > hole.getPosition().y - 5 && 
@@ -216,6 +231,23 @@ void App::updatePhysics(){
         }
 
         accumulator -= FIXED_DELTA_TIME;
+    }
+}
+
+void App::checkCollisions(){
+    for(Tile t : tiles){
+        sdl::sdlDirection dir = ball.collidesWith(t);
+        if(dir != sdl::sdlDirection::SDL_NONE){
+            if(dir == sdl::sdlDirection::SDL_LEFT || dir == sdl::sdlDirection::SDL_RIGHT){
+                ball.setVelocity(-ball.getVelocity().x, ball.getVelocity().y);
+            }
+            else if(dir == sdl::sdlDirection::SDL_UP || dir == sdl::sdlDirection::SDL_DOWN){
+                ball.setVelocity(ball.getVelocity().x, -ball.getVelocity().y);
+            }
+            Mix_PlayChannel(-1, collisionSound, 0);
+            Mix_Volume(-1, ball.getVelocity1D() * 1.28f );
+        
+        }
     }
 }
 
@@ -265,6 +297,10 @@ void App::render(){
 
     window->render(field);
     window->render(hole);
+
+    for(Tile t : tiles){
+        window->render(t);
+    }
 
     if(lock && draw_aux){
         window->render(arrow);

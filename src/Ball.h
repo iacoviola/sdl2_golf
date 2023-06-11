@@ -2,6 +2,7 @@
 #define BALL_H
 
 #include "Sprite.h"
+#include "Tile.h"
 
 class Ball : public sdl::Sprite
 {
@@ -21,6 +22,12 @@ class Ball : public sdl::Sprite
         void setVelocity(math::Vector2f velocity);
 
         void setVelocity(float x, float y);
+
+        void setVelocity1D(float velocity);
+
+        float getVelocity1D();
+
+        sdl::sdlDirection collidesWith(Tile& obstacle);
 
         void setMoving(bool moving);
 

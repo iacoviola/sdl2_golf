@@ -7,6 +7,15 @@
 #include "Texture.h"
 
 namespace sdl {
+
+enum sdlDirection {
+    SDL_NONE = -1,
+    SDL_UP = 0,
+    SDL_DOWN = 1,
+    SDL_LEFT = 2,
+    SDL_RIGHT = 3
+};
+
 class Sprite
 {
     public:
@@ -58,7 +67,7 @@ class Sprite
 
         math::Vector2f getCenter();
 
-        private:
+        protected:
             sdl::Texture* texture;
             math::Vector2f scale;
             math::Vector2f position;

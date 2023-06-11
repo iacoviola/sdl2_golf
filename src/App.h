@@ -4,10 +4,12 @@
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_mixer.h>
 #include <chrono>
+#include <vector>
 
 #include "RenderWindow.h"
 #include "Sprite.h" 
 #include "Ball.h"
+#include "Tile.h"
 
 class App
 {
@@ -33,6 +35,7 @@ class App
         void resetGame();
 
         void updatePhysics();
+        void checkCollisions();
         void updateStatic();
 
         void render();
@@ -49,6 +52,8 @@ class App
         Mix_Chunk* swingSound;
         Mix_Chunk* collisionSound;
         Mix_Chunk* holeSound;
+
+        std::vector<Tile> tiles;
 
         std::chrono::steady_clock::time_point current_time;
         std::chrono::steady_clock::time_point previous_time;

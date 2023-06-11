@@ -27,8 +27,6 @@ class Ball : public sdl::Sprite
 
         float getVelocity1D();
 
-        sdl::sdlDirection collidesWith(Tile& obstacle);
-
         void setMoving(bool moving);
 
         bool isMoving() const;

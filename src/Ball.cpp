@@ -57,26 +57,6 @@ float Ball::getVelocity1D(){
     return velocity1D;
 }
 
-sdl::sdlDirection Ball::collidesWith(Tile& obstacle){
-    if(position.x + scale.x < obstacle.getPosition().x){
-        return sdl::sdlDirection::SDL_LEFT;
-    }
-
-    if(position.x > obstacle.getPosition().x + obstacle.getScale().x){
-        return sdl::sdlDirection::SDL_RIGHT;
-    }
-
-    if(position.y + scale.y < obstacle.getPosition().y){
-        return sdl::sdlDirection::SDL_UP;
-    }
-
-    if(position.y > obstacle.getPosition().y + obstacle.getScale().y){
-        return sdl::sdlDirection::SDL_DOWN;
-    }
-
-    return sdl::sdlDirection::SDL_NONE;
-}
-
 void Ball::setMoving(bool moving){
     this->moving = moving;
 }

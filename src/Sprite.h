@@ -27,6 +27,8 @@ class Sprite
 
         ~Sprite();
 
+        sdlDirection collidesWith(Sprite& other);
+
         void setTexture(sdl::Texture* texture);
 
         void setScale(math::Vector2f scale);

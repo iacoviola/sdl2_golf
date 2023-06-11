@@ -20,6 +20,35 @@ sdl::Sprite::~Sprite(){
     clip = nullptr;
 }
 
+sdl::sdlDirection sdl::Sprite::collidesWith(Sprite& other){
+    if(position.x >= other.position.x + other.scale.x ||
+       position.x + scale.x <= other.position.x ||
+       position.y >= other.position.y + other.scale.y ||
+       position.y + scale.y <= other.position.y){
+          return sdl::sdlDirection::SDL_NONE;
+    }
+    else {
+        math::Vector2f distance = getCenter() - other.getCenter();
+
+        if(abs(distance.x) > abs(distance.y)){
+            if(distance.x > 0){
+                return sdl::sdlDirection::SDL_RIGHT;
+            }
+            else {
+                return sdl::sdlDirection::SDL_LEFT;
+            }
+        }
+        else {
+            if(distance.y > 0){
+                return sdl::sdlDirection::SDL_DOWN;
+            }
+            else {
+                return sdl::sdlDirection::SDL_UP;
+            }
+        }
+    }
+}
+
 void sdl::Sprite::setTexture(sdl::Texture* texture){
     this->texture = texture;
     setScale(texture->getWidth(), texture->getHeight());

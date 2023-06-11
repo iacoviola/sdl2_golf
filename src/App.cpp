@@ -12,7 +12,7 @@
 #include "Tile.h"
 #include "Ball.h"
 
-App::App(){
+App::App() { //: gen(std::random_device()()){
     init();
 }
 
@@ -35,7 +35,6 @@ void App::run(){
         current_time = std::chrono::steady_clock::now();
         dt = std::chrono::duration_cast<std::chrono::microseconds>(current_time - previous_time);
         previous_time = current_time;
-
 
         double acc = dt.count() / 1000000.0f;
         accumulator += acc;
@@ -60,7 +59,9 @@ void App::init(){
     int imgFlags = IMG_INIT_PNG | IMG_INIT_JPG;
     sdl::initSDL(flags, modules, imgFlags);
 
-    window = new sdl::RenderWindow("SDL2 Golf", 640, 480);
+    srand(time(NULL));
+
+    window = new sdl::RenderWindow("SDL2 Golf", 480, 640);
 
     ball.setTexture(window->loadTextureFromFile("../../res/imgs/golf_ball.png"));
     hole.setTexture(window->loadTextureFromFile("../../res/imgs/hole.png"));
@@ -70,26 +71,17 @@ void App::init(){
     powerbar_bg.setTexture(window->loadTextureFromFile("../../res/imgs/powerbar_bg.png"));
 
     sdl::Texture* tileTexture = window->loadTextureFromFile("../../res/imgs/tile.png");
-    for(int i = 0; i < 3; i++){
+    for(int i = 0; i < 5; i++){
         Tile tile(tileTexture);
-        tile.setPosition(100 + i * 100, 100);
         tile.setScale(tileTexture->getWidth(), tileTexture->getHeight());
-        tiles.push_back(Tile(tileTexture));
+        tiles.push_back(tile);
     }
+
+    randomize();
 
     swingSound = Mix_LoadWAV("../../res/sounds/swing.wav");
     collisionSound = Mix_LoadWAV("../../res/sounds/collision.wav");
     holeSound = Mix_LoadWAV("../../res/sounds/hole.wav");
-
-    int x, y;
-    ball.setScale(ball.getTexture()->getWidth(), ball.getTexture()->getHeight());
-    x = (rand() % (window->getWidth() - (int)ball.getScale().x * 2)) + ball.getScale().x;
-    y = (rand() % (window->getHeight() - (int)ball.getScale().y * 2)) + ball.getScale().y;
-    ball.setPosition(x ,y);
-
-    x = (rand() % (window->getWidth() - (int)hole.getScale().x * 2)) + hole.getScale().x;
-    y = (rand() % (window->getHeight() - (int)hole.getScale().y * 2)) + hole.getScale().y;
-    hole.setPosition(x, y);
 }
 
 void App::handleEvents() {
@@ -111,7 +103,6 @@ void App::handleEvents() {
             case SDL_KEYDOWN:
                 handleKeyDown(event);
                 break;
-            // Add more cases for other event types if needed
         }
     }
 }
@@ -136,7 +127,7 @@ void App::handleMouseButtonUp(const SDL_FRect& ball_rect) {
                                                         -(y - (ball_rect.y + ball_rect.h / 2)));
     ball.setVelocity1D(golf_ball_velocity.magnitude());
 
-    if (ball.getVelocity1D() > 15.0f) {
+    if (ball.getVelocity1D() > ball_rect.w / 2.0f) {
         if (ball.getVelocity1D() > 100.0f) {
             ball.setVelocity1D(100.0f);
             float angle = atan2(golf_ball_velocity.y, golf_ball_velocity.x);
@@ -168,17 +159,30 @@ void App::handleKeyDown(const SDL_Event& event) {
 }
 
 void App::resetGame() {
-    int x, y;
     ball.setScale(ball.getTexture()->getWidth(), ball.getTexture()->getHeight());
-    x = (rand() % (window->getWidth() - (int)ball.getScale().x * 2)) + ball.getScale().x;
-    y = (rand() % (window->getHeight() - (int)ball.getScale().y * 2)) + ball.getScale().y;
-    ball.setPosition(x, y);
-
-    x = (rand() % (window->getWidth() - (int)hole.getScale().x * 2)) + hole.getScale().x;
-    y = (rand() % (window->getHeight() - (int)hole.getScale().y * 2)) + hole.getScale().y;
-    hole.setPosition(x, y);
+    randomize();
 
     win = false;
+}
+
+void App::randomize(){
+    
+    int x, y;
+    x = (rand() % (window->getWidth() - (int)ball.getScale().x * 2)) + ball.getScale().x;
+    y = window->getHeight() - ball.getScale().y - 30;
+    ball.setPosition(x ,y);
+
+    x = (rand() % (window->getWidth() - (int)hole.getScale().x * 2)) + hole.getScale().x;
+    y = (rand() % (window->getHeight() / 4 - (int)hole.getScale().y * 2)) + hole.getScale().y;
+    hole.setPosition(x, y);
+
+    for(Tile &tile : tiles){
+        do{
+            x = (rand() % (window->getWidth() - (int)tile.getScale().x * 2)) + tile.getScale().x;
+            y = (rand() % (window->getHeight() - (int)tile.getScale().y * 2 - (int)ball.getScale().y - 50)) + tile.getScale().y;
+            tile.setPosition(x, y);
+        } while(tile.collidesWith(hole) != sdl::sdlDirection::SDL_NONE);
+    }
 }
 
 void App::updatePhysics(){
@@ -214,7 +218,7 @@ void App::updatePhysics(){
 
         if(!win){
             float distance = sqrt(pow(ball.getCenter().x - hole.getCenter().x, 2) + pow(ball.getCenter().y - hole.getCenter().y, 2));
-            if(distance < 7.5f && ball.getVelocity1D() < 50.0f
+            if(distance < 7.5f && ball.getVelocity1D() < 70.0f
                 /*ball.getPosition().x > hole.getPosition().x - 5 && 
                 ball.getPosition().x + ball.getScale().x < hole.getPosition().x + hole.getScale().x + 5 && 
                 ball.getPosition().y > hole.getPosition().y - 5 && 
@@ -238,15 +242,23 @@ void App::checkCollisions(){
     for(Tile t : tiles){
         sdl::sdlDirection dir = ball.collidesWith(t);
         if(dir != sdl::sdlDirection::SDL_NONE){
-            if(dir == sdl::sdlDirection::SDL_LEFT || dir == sdl::sdlDirection::SDL_RIGHT){
+            if(dir == sdl::sdlDirection::SDL_LEFT){
+                ball.setPosition(t.getPosition().x - ball.getScale().x, ball.getPosition().y);
                 ball.setVelocity(-ball.getVelocity().x, ball.getVelocity().y);
-            }
-            else if(dir == sdl::sdlDirection::SDL_UP || dir == sdl::sdlDirection::SDL_DOWN){
+            } else if(dir == sdl::sdlDirection::SDL_RIGHT){
+                ball.setPosition(t.getPosition().x + t.getScale().x, ball.getPosition().y);
+                ball.setVelocity(-ball.getVelocity().x, ball.getVelocity().y);
+            } else if(dir == sdl::sdlDirection::SDL_UP){
+                ball.setPosition(ball.getPosition().x, t.getPosition().y - ball.getScale().y);
+                ball.setVelocity(ball.getVelocity().x, -ball.getVelocity().y);
+            } else if(dir == sdl::sdlDirection::SDL_DOWN){
+                ball.setPosition(ball.getPosition().x, t.getPosition().y + t.getScale().y);
                 ball.setVelocity(ball.getVelocity().x, -ball.getVelocity().y);
             }
             Mix_PlayChannel(-1, collisionSound, 0);
             Mix_Volume(-1, ball.getVelocity1D() * 1.28f );
-        
+
+            break;
         }
     }
 }

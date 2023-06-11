@@ -5,6 +5,7 @@
 #include <SDL2/SDL_mixer.h>
 #include <chrono>
 #include <vector>
+#include <random>
 
 #include "RenderWindow.h"
 #include "Sprite.h" 
@@ -33,6 +34,7 @@ class App
         void handleKeyDown(const SDL_Event& event);
 
         void resetGame();
+        void randomize();
 
         void updatePhysics();
         void checkCollisions();
@@ -64,6 +66,8 @@ class App
         bool lock = false, win = false, running = true, draw_aux = false;
 
         const double FIXED_DELTA_TIME = 0.016;
+
+        //std::mt19937 gen;
 };
 
 #endif // APP_H
